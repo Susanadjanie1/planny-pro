@@ -155,7 +155,7 @@ function Feature({ icon, title, text }) {
 function Testimonial({ quote, author, role }) {
   return (
     <div className="bg-gray-50 rounded-lg p-6 shadow-md">
-      <p className="text-gray-700 mb-6 italic">"{quote}"</p>
+      <p className="text-gray-700 mb-6 italic">{quote}</p>
       <div>
         <p className="font-semibold text-indigo-900">{author}</p>
         <p className="text-sm text-gray-600">{role}</p>

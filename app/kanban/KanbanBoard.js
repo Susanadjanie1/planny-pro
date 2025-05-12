@@ -79,7 +79,7 @@ export default function KanbanBoard({ userId, tasks: propTasks, mutate: propMuta
         </div>
       ) : filteredTasks.length === 0 ? (
         <div className="bg-blue-100 p-4 rounded">
-          <p className="text-blue-800">No tasks assigned to you. Check if your user ID ({userId}) matches what's in the task assignments.</p>
+          <p className="text-blue-800">No tasks assigned to you. Check if your user ID ({userId}) matches what&apos;s in the task assignments.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

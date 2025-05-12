@@ -11,7 +11,6 @@ export default function CommentSection({ taskId }) {
   const [currentUserId, setCurrentUserId] = useState(null)
 
   useEffect(() => {
-    // Get current user ID from cookies
     const getCookie = (name) => {
       const value = `; ${document.cookie}`
       const parts = value.split(`; ${name}=`)
@@ -22,55 +21,45 @@ export default function CommentSection({ taskId }) {
     const userId = getCookie("userId")
     setCurrentUserId(userId)
 
-    fetchComments()
-  }, [taskId])
+    async function fetchComments() {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const res = await fetch(`/api/tasks/${taskId}/comments`)
+        if (!res.ok) throw new Error("Failed to fetch comments")
 
-  async function fetchComments() {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/tasks/${taskId}/comments`)
+        const data = await res.json()
+        const commentMap = new Map()
+        const rootComments = []
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch comments")
-      }
-
-      const data = await res.json()
-
-      // Transform the flat comments array into a threaded structure
-      const commentMap = new Map()
-      const rootComments = []
-
-      // First pass: create a map of all comments
-      data.comments.forEach((comment) => {
-        commentMap.set(comment._id, {
-          ...comment,
-          replies: [],
+        data.comments.forEach((comment) => {
+          commentMap.set(comment._id, { ...comment, replies: [] })
         })
-      })
 
-      // Second pass: build the tree structure
-      commentMap.forEach((comment) => {
-        if (comment.parentId) {
-          const parent = commentMap.get(comment.parentId)
-          if (parent) {
-            parent.replies.push(comment)
+        commentMap.forEach((comment) => {
+          if (comment.parentId) {
+            const parent = commentMap.get(comment.parentId)
+            if (parent) {
+              parent.replies.push(comment)
+            } else {
+              rootComments.push(comment)
+            }
           } else {
             rootComments.push(comment)
           }
-        } else {
-          rootComments.push(comment)
-        }
-      })
+        })
 
-      setComments(rootComments)
-    } catch (err) {
-      console.error("Error fetching comments:", err)
-      setError("Failed to load comments")
-    } finally {
-      setIsLoading(false)
+        setComments(rootComments)
+      } catch (err) {
+        console.error("Error fetching comments:", err)
+        setError("Failed to load comments")
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
+
+    fetchComments()
+  }, [taskId])
 
   async function addComment(content) {
     try {
@@ -91,17 +80,13 @@ export default function CommentSection({ taskId }) {
         },
         body: JSON.stringify({
           text: content,
-          userId: userId,
-          email: email,
+          userId,
+          email,
         }),
       })
 
-      if (!res.ok) {
-        throw new Error("Failed to add comment")
-      }
-
-      // Refresh comments after adding
-      fetchComments()
+      if (!res.ok) throw new Error("Failed to add comment")
+      location.reload()
     } catch (err) {
       console.error("Error adding comment:", err)
       setError("Failed to add comment")
@@ -127,22 +112,19 @@ export default function CommentSection({ taskId }) {
         },
         body: JSON.stringify({
           text: content,
-          parentId: parentId,
-          userId: userId,
-          email: email,
+          parentId,
+          userId,
+          email,
         }),
       })
 
-      if (!res.ok) {
-        throw new Error("Failed to add reply")
-      }
-
-      // Refresh comments after adding reply
-      fetchComments()
-      setReplyingTo(null)
+      if (!res.ok) throw new Error("Failed to add reply")
+      location.reload()
     } catch (err) {
       console.error("Error adding reply:", err)
       setError("Failed to add reply")
+    } finally {
+      setReplyingTo(null)
     }
   }
 
@@ -164,16 +146,12 @@ export default function CommentSection({ taskId }) {
         },
         body: JSON.stringify({
           text: newContent,
-          userId: userId,
+          userId,
         }),
       })
 
-      if (!res.ok) {
-        throw new Error("Failed to update comment")
-      }
-
-      // Refresh comments after editing
-      fetchComments()
+      if (!res.ok) throw new Error("Failed to update comment")
+      location.reload()
     } catch (err) {
       console.error("Error updating comment:", err)
       setError("Failed to update comment")
@@ -195,12 +173,8 @@ export default function CommentSection({ taskId }) {
         method: "DELETE",
       })
 
-      if (!res.ok) {
-        throw new Error("Failed to delete comment")
-      }
-
-      // Refresh comments after deleting
-      fetchComments()
+      if (!res.ok) throw new Error("Failed to delete comment")
+      location.reload()
     } catch (err) {
       console.error("Error deleting comment:", err)
       setError("Failed to delete comment")
@@ -223,18 +197,11 @@ export default function CommentSection({ taskId }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          emoji,
-          userId: userId,
-        }),
+        body: JSON.stringify({ emoji, userId }),
       })
 
-      if (!res.ok) {
-        throw new Error("Failed to toggle reaction")
-      }
-
-      // Refresh comments after toggling reaction
-      fetchComments()
+      if (!res.ok) throw new Error("Failed to toggle reaction")
+      location.reload()
     } catch (err) {
       console.error("Error toggling reaction:", err)
       setError("Failed to toggle reaction")
