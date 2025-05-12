@@ -11,17 +11,10 @@ export default function ManagerDashboard({ session }) {
         <h1 className="text-3xl font-bold">
           Manager Panel – {session.user.name}
         </h1>
-        {/* <LogoutButton /> */}
       </div>
-
-      {/* <div className="space-y-6">
-        <ProjectMetrics tasks={tasks} />
-        <KanbanBoard />
-      </div> */}
 
       <div className="space-y-6">
         <KanbanBoard />
-        {/* Add task assignment or metrics display */}
       </div>
     </div>
   );
