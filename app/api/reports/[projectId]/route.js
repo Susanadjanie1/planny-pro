@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import connectDB from "lib/db";
-import Project from "app/models/Project";
-import Task from "app/models/Task";
+import connectDB from "../../../../lib/db"
+import Project from "../../../models/Project"
+import Task from "../../../models/Task"
 
 export async function GET(req, { params }) {
   try {

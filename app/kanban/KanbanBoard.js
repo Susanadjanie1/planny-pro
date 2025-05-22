@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Search, AlertCircle } from "lucide-react"
 import { toast } from "react-toastify"
-import TaskColumn from "./TaskColumn"
+import TaskColumn from "../kanban/TaskColumn"
 
 const backgroundOptions = [
   { id: "gradient1", name: "Purple Gradient", value: "bg-gradient-to-r from-[#4B0082]/90 to-purple-600/90" },

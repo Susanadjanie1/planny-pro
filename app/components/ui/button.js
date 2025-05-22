@@ -1,4 +1,4 @@
-import { cn } from "lib/lib/utils"
+import { cn } from "../../../lib/lib/utils"
 
 export function Button({ className, variant = "default", size = "default", ...props }) {
   const base =

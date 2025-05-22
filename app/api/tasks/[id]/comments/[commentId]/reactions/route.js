@@ -1,5 +1,5 @@
-import connectDB from "lib/db"
-import Task from "app/models/Task"
+import connectDB from "../../../../../../../lib/db"
+import Task from "../../../../../../models/Task"
 import { NextResponse } from "next/server"
 import mongoose from "mongoose"
 import jwt from "jsonwebtoken"

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import connectDB from "lib/db";
-import Project from "app/models/Project";
-import User from "app/models/User";
-import { ROLES } from "lib/constants";
+import connectDB from "../../../lib/db"
+import Project from "../../models/Project";
+import User from "../../models/User"
+import { ROLES } from "../../../lib/constants"
 import mongoose from "mongoose";
 
 // Helper to extract user from JWT

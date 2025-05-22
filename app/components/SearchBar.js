@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Search, X, Loader2 } from "lucide-react"
-import { useDebounce } from "app/hooks/useDebounce"
+import { useDebounce } from "../hooks/useDebounce"
 
 export default function SearchBar({ onResultSelect, className = "" }) {
   const [query, setQuery] = useState("")

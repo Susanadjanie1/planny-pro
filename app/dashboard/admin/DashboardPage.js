@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
 import { Download, FilePlus, ListTodo, PlusCircle } from "lucide-react"
-import Sidebar from "app/components/Sidebar"
-import ProjectForm from "./ProjectForm"
+import Sidebar from "../../components/Sidebar"
+import ProjectForm from "../../dashboard/admin/ProjectForm"
 import ProjectList from "./projects/ProjectList"
 import TaskForm from "./TaskForm"
 import TaskList from "./tasks/TaskList"
-import SearchBar from "app/components/SearchBar"
+import SearchBar from "../../components/SearchBar"
 
 export default function DashboardPage({ session }) {
   const [refreshFlag, setRefreshFlag] = useState(0)

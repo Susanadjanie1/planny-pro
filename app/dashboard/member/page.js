@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import KanbanBoard from "../../kanban/KanbanBoard"
-import { fetcherWithAuth } from "lib/fetcherWithAuth";
+import { fetcherWithAuth } from "../../../lib/fetcherWithAuth"
 
 export default function MemberDashboard() {
   const [user, setUser] = useState(null);

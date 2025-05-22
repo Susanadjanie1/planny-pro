@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Calendar, Clock, MoreVertical, CheckCircle, Timer, ArrowRight } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "react-toastify"
-import CommentSection from "app/components/CommentSection"
+import CommentSection from "../components/CommentSection"
 
 export default function MemberTaskCard({ task, mutate, onMoveTask }) {
   const [menuOpen, setMenuOpen] = useState(false)

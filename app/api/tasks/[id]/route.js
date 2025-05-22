@@ -1,4 +1,4 @@
-import connectDB from "lib/db";
+import connectDB from "../../../../lib/db"
 import Task from "../../../models/Task"
 import Project from "../../../models/Project"
 import User from "../../../models/User";

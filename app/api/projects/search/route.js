@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import connectDB from "lib/db"
-import Project from "app/models/Project"
-import { verifyToken } from "lib/auth"
-import { ROLES } from "lib/constants"
+import connectDB from "../../../../lib/db"
+import Project from "../../../models/Project"
+import { verifyToken } from "../../../../lib/auth"
+import { ROLES } from "../../../../lib/constants"
 
 export async function GET(req) {
   try {

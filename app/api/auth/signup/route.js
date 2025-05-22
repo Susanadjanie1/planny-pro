@@ -1,5 +1,5 @@
-import connectDB from 'lib/db';
-import User from 'app/models/User';
+import connectDB from "../../../../lib/db"
+import User from "../../../models/User"
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 

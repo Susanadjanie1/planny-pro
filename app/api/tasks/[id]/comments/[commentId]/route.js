@@ -1,6 +1,6 @@
-import connectDB from "lib/db"
-import Task from "app/models/Task"
-import { ROLES } from "lib/constants"
+import connectDB from "../../../../../../lib/db"
+import Task from "../../../../../models/Task"
+import { ROLES } from "../../../../../../lib/constants"
 import jwt from "jsonwebtoken"
 import { NextResponse } from "next/server"
 

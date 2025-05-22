@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TaskForm from "../TaskForm";
-import { fetcherWithAuth } from "lib/fetcherWithAuth";
-import CommentSection from "app/components/CommentSection";
+import { fetcherWithAuth } from "../../../../lib/fetcherWithAuth"
+import CommentSection from "../../../components/CommentSection"
 import {
   MessageSquare,
   Edit,

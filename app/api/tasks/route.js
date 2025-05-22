@@ -1,8 +1,8 @@
-import connectDB from "lib/db"
+import connectDB from "../../../lib/db"
 import Task from "../../models/Task"
 import User from "../../models/User"
 import jwt from "jsonwebtoken"
-import { ROLES } from "lib/constants"
+import { ROLES } from "../../../lib/constants"
 import mongoose from "mongoose"
 
 const getUserFromRequest = async (req) => {

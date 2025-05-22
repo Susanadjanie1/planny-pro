@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import connectDB from "lib/db"
-import Task from "app/models/Task"
-import { verifyToken } from "lib/auth"
-import { ROLES } from "lib/constants"
+import connectDB from "../../../../lib/db"
+import Task from "../../../models/Task"
+import { verifyToken } from "../../../../lib/auth"
+import { ROLES } from "../../../../lib/constants"
 import mongoose from "mongoose"
 
 export async function GET(req) {

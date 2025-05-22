@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import ProjectProgressBar from "./ProjectProgressBar"
-import ProgressCircle from "app/components/ProgressCircle"
+import ProjectProgressBar from "../kanban/ProjectProgressBar"
+import ProgressCircle from "../components/ProgressCircle"
 
 export default function ProjectMetrics({ tasks = [] }) {
   // Initialize metrics with zero values

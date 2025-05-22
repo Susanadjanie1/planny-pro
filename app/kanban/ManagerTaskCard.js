@@ -14,7 +14,7 @@ import {
   Flag,
 } from "lucide-react"
 import { format } from "date-fns"
-import CommentSection from "app/components/CommentSection"
+import CommentSection from "../components/CommentSection"
 
 export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = false }) {
   const [menuOpen, setMenuOpen] = useState(false)

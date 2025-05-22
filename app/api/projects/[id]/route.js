@@ -1,8 +1,8 @@
-import connectDB from "lib/db"
-import Project from "app/models/Project"
+import connectDB from "../../../../lib/db"
+import Project from "../../../models/Project"
 import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { ROLES } from "lib/constants"
+import { ROLES } from "../../../../lib/constants"
 
 const getUserFromRequest = async (req) => {
   const authHeader = req.headers.get("authorization")

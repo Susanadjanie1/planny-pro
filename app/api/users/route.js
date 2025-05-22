@@ -1,8 +1,8 @@
-import connectDB from "lib/db"
+import connectDB from "../../../lib/db"
 import User from "../../models/User"
 import { NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
-import { ROLES } from "lib/constants"
+import { ROLES } from "../../../lib/constants"
 
 // Helper function to get user from request
 const getUserFromRequest = async (req) => {

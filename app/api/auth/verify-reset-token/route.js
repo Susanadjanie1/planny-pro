@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import connectDB from "lib/db"
-import User from "app/models/User"
+import connectDB from "../../../../lib/db"
+import User from "../../../models/User"
 import crypto from "crypto"
 
 export async function GET(req) {
