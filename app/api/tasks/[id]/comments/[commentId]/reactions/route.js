@@ -2,13 +2,34 @@ import connectDB from "lib/db"
 import Task from "app/models/Task"
 import { NextResponse } from "next/server"
 import mongoose from "mongoose"
+import jwt from "jsonwebtoken"
+
+// Helper function to get user from request
+const getUserFromRequest = async (req) => {
+  const authHeader = req.headers.get("authorization")
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null
+
+  const token = authHeader.split(" ")[1]
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET)
+  } catch (err) {
+    console.error("JWT verify failed:", err)
+    return null
+  }
+}
 
 export async function POST(req, { params }) {
   await connectDB()
   const { id: taskId, commentId } = params
 
   try {
-    const { emoji, userId } = await req.json()
+    const user = await getUserFromRequest(req)
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { emoji } = await req.json()
+    const userId = user.userId
 
     if (!userId) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 })
@@ -28,21 +49,17 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: "Comment not found" }, { status: 404 })
     }
 
-    // Initialize reactions array if it doesn't exist
     if (!comment.reactions) {
       comment.reactions = []
     }
 
-    // Check if user already reacted with this emoji
     const existingReactionIndex = comment.reactions.findIndex(
       (r) => r.emoji === emoji && r.userId.toString() === userId,
     )
 
     if (existingReactionIndex > -1) {
-      // Remove the reaction if it exists
       comment.reactions.splice(existingReactionIndex, 1)
     } else {
-      // Add the reaction if it doesn't exist
       comment.reactions.push({
         userId: userId,
         emoji: emoji,
@@ -51,7 +68,6 @@ export async function POST(req, { params }) {
 
     await task.save()
 
-    // Group reactions by emoji for the response
     const groupedReactions = comment.reactions.reduce((acc, reaction) => {
       if (!acc[reaction.emoji]) {
         acc[reaction.emoji] = {

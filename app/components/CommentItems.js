@@ -42,7 +42,6 @@ export function CommentItem({
     setShowReactionPicker(false)
   }
 
-  // Format the timestamp
   const formattedTime = comment.timestamp ? formatDistanceToNow(new Date(comment.timestamp), { addSuffix: true }) : ""
 
   // Check if current user is the author of the comment

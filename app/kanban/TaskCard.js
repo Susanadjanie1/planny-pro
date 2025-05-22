@@ -1,23 +1,25 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import ManagerTaskCard from "./ManagerTaskCard";
-import MemberTaskCard from "./MemberTaskCard";
-import BasicTaskCard from "./BasicTaskCard";
+import ManagerTaskCard from "./ManagerTaskCard"
+import MemberTaskCard from "./MemberTaskCard"
 
-export default function TaskCard({ task, mutate, userRole }) {
-  // Default to a basic view if no role is provided
-  if (!userRole) {
-    // return <BasicTaskCard task={task} />;
+export default function TaskCard({ task, mutate, userRole, onMoveTask, columnId }) {
+  if (!userRole) return null
+
+  const roleComponents = {
+    admin: (props) => <ManagerTaskCard {...props} isAdmin={true} />,
+    manager: ManagerTaskCard,
+    member: MemberTaskCard,
   }
-  
-  // Render the appropriate card based on user role
-  switch (userRole) {
-    case "manager":
-      return <ManagerTaskCard task={task} mutate={mutate} />;
-    case "member":
-      return <MemberTaskCard task={task} mutate={mutate} />;
-    default:
-      // return <BasicTaskCard task={task} />;
-  }
+
+  const RoleCard = roleComponents[userRole]
+
+  return RoleCard ? (
+    <RoleCard
+      task={task}
+      mutate={mutate}
+      onMoveTask={onMoveTask}
+      columnId={columnId}
+    />
+  ) : null
 }

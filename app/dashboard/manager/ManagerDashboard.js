@@ -1,8 +1,6 @@
 "use client";
 
 import KanbanBoard from "../../kanban/KanbanBoard";
-import LogoutButton from "../../components/LogoutButton";
-import ProjectMetrics from "app/kanban/ProjectMetrics";
 
 export default function ManagerDashboard({ session }) {
   return (

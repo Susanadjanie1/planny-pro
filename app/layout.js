@@ -26,10 +26,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+         
         >
           <div className="flex flex-col min-h-screen">
             <Navbar />
@@ -45,3 +42,7 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+
+
+

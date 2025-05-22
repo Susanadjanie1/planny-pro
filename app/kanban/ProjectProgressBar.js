@@ -1,4 +1,3 @@
-// app/kanban/ProjectProgressBar.js
 'use client';
 
 export default function ProjectProgressBar({ done, total }) {

@@ -1,39 +1,66 @@
-'use client';
+"use client"
 
-import TaskCard from './TaskCard';
-import ManagerTaskCard from './ManagerTaskCard';
-import MemberTaskCard from './MemberTaskCard';
+import { Plus } from "lucide-react"
+import TaskCard from "./TaskCard"
 
-export default function TaskColumn({ status, tasks, mutate, userRole }) {
+export default function TaskColumn({ id, title, tasks, mutate, userRole, onMoveTask }) {
   const formatStatusName = (status) =>
     status
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      ?.split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ") || "Unknown Status"
 
-  const renderCard = (task) => {
-    if (userRole === 'manager') {
-      return <ManagerTaskCard key={task._id} task={task} mutate={mutate} />;
-    }
-    if (userRole === 'member') {
-      return <MemberTaskCard key={task._id} task={task} mutate={mutate} />;
-    }
-    return <TaskCard key={task._id} task={task} mutate={mutate} userRole={userRole} />;
-  };
+  const displayTitle = title || formatStatusName(id)
+
+  const canAddTask = userRole === "admin" || userRole === "manager"
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl shadow-md min-w-[260px]">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-bold text-[#4B0082] dark:text-indigo-300 capitalize">
-          {formatStatusName(status)}
-        </h3>
-        <span className="text-sm bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-0.5 rounded-full">
-          {tasks.length}
+    <div className="flex flex-col h-full">
+      <h3 className="font-semibold text-white mb-3 flex items-center justify-between">
+        <span className="flex items-center">
+          {displayTitle}
+          <span className="ml-2 bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">{tasks.length}</span>
         </span>
-      </div>
-      <div className="space-y-4">
-        {tasks.map((task) => renderCard(task))}
+
+        {canAddTask && (
+          <button
+            onClick={() => alert(`Add Task to ${id} (implement your modal)`)}
+            className="text-white hover:text-[#FFD700] transition-colors"
+            title="Add Task"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+        )}
+      </h3>
+
+      <div className="flex-1 p-3 rounded-md min-h-[500px] bg-white/5 hover:bg-white/10 transition-colors duration-200 overflow-auto">
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            <div key={task._id} className="mb-3">
+              <TaskCard
+                task={task}
+                mutate={mutate}
+                userRole={userRole}
+                columnId={id}
+                onMoveTask={onMoveTask}
+              />
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center h-32 bg-white/10 rounded-md text-white/70 text-sm">
+            <p>No tasks</p>
+            {canAddTask && (
+              <button
+                onClick={() => alert(`Add Task to ${id} (implement your modal)`)}
+                className="mt-2 flex items-center text-white hover:text-[#FFD700] transition-colors"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Task
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 export default function ProgressCircle({ percentage }) {
   return (
@@ -10,9 +10,9 @@ export default function ProgressCircle({ percentage }) {
         value={percentage}
         text={`${percentage}%`}
         styles={buildStyles({
-          textColor: '#4B0082', // Indigo
-          pathColor: '#FFD700', // Gold
-          trailColor: '#eee',
+          textColor: "#4B0082",
+          pathColor: "#FFD700",
+          trailColor: "#eee",
         })}
       />
     </div>

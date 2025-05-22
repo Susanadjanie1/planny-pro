@@ -67,7 +67,7 @@ export default function ProjectForm({ project = null, onProjectCreated }) {
       body: JSON.stringify({
         title,
         description,
-        teamMembers: teamMembers.map((u) => u.value), // Extract ObjectIDs
+        teamMembers: teamMembers.map((u) => u.value),
       }),
     });
 
@@ -79,7 +79,6 @@ export default function ProjectForm({ project = null, onProjectCreated }) {
       setTeamMembers([]);
       onProjectCreated?.();
       setIsOpen(false);
-      toast.success(project ? "Project updated!" : "Project created!");
     } else {
       alert("Failed to save project: " + (data.error || "Unknown error"));
     }

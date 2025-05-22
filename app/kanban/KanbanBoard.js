@@ -1,99 +1,180 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import useSWR from 'swr';
-import { jwtDecode } from 'jwt-decode';
-import TaskColumn from './TaskColumn';
-import { fetcherWithAuth } from 'lib/fetcherWithAuth';
+import { useState, useEffect, useCallback } from "react"
+import { Search, AlertCircle } from "lucide-react"
+import { toast } from "react-toastify"
+import TaskColumn from "./TaskColumn"
 
-const STATUSES = ['todo', 'in_progress', 'done'];
+const backgroundOptions = [
+  { id: "gradient1", name: "Purple Gradient", value: "bg-gradient-to-r from-[#4B0082]/90 to-purple-600/90" },
+  { id: "gradient2", name: "Gold Luxury", value: "bg-gradient-to-r from-[#FFD700]/90 to-amber-600/90" },
+  { id: "solid", name: "Solid Indigo", value: "bg-[#4B0082]/90" },
+  { id: "pattern", name: "Subtle Pattern", value: "bg-[url('/patterns/subtle-pattern.png')] bg-repeat bg-[#4B0082]/90" },
+]
 
-export default function KanbanBoard({ userId, tasks: propTasks, mutate: propMutate }) {
-  const [userRole, setUserRole] = useState(null);
+export default function KanbanBoard({ tasks = [], mutate, isLoading = false, error = null, userRole = "manager" }) {
+  const [columns, setColumns] = useState({
+    todo: { title: "To Do", items: [] },
+    in_progress: { title: "In Progress", items: [] },
+    done: { title: "Done", items: [] },
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [background, setBackground] = useState(backgroundOptions[0].value)
+  const [taskUpdating, setTaskUpdating] = useState(false)
+  const [movingTaskId, setMovingTaskId] = useState(null)
 
-  // Only fetch tasks if they weren't passed as props
-  const {
-    data: fetchedTasks,
-    error,
-    mutate: fetchMutate,
-  } = useSWR(propTasks ? null : '/api/tasks', fetcherWithAuth);
+  // Updates task status by calling API & triggering mutate()
+  const updateTaskStatus = useCallback(
+    async (taskId, newStatus) => {
+      if (taskUpdating && movingTaskId === taskId) return false
 
-  // Extract tasks array from the response if needed
-  const rawTasks = propTasks || (fetchedTasks?.tasks || fetchedTasks);
-  const tasks = Array.isArray(rawTasks) ? rawTasks : [];
-  const mutate = propMutate || fetchMutate;
+      setTaskUpdating(true)
+      setMovingTaskId(taskId)
 
-  console.log('KanbanBoard data:', {
-    userId,
-    tasksLength: tasks.length,
-    firstTask: tasks[0], // Show sample of first task for debugging
-  });
-
-  // Get user role from token in localStorage
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
       try {
-        const decoded = jwtDecode(token);
-        setUserRole(decoded?.role || 'guest');
+        const token = localStorage.getItem("token")
+
+        const response = await fetch(`/api/tasks/${taskId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Failed to update task status")
+        }
+
+        await new Promise((r) => setTimeout(r, 300))
+
+        if (mutate) await mutate()
+        return true
       } catch (err) {
-        console.error('Failed to decode JWT:', err);
-        setUserRole('guest');
+        toast.error(`Error: ${err.message}`)
+        return false
+      } finally {
+        setTaskUpdating(false)
+        setMovingTaskId(null)
+      }
+    },
+    [mutate, taskUpdating, movingTaskId],
+  )
+
+  // Organize tasks by status & filter by search term
+  useEffect(() => {
+    if (!Array.isArray(tasks)) return
+
+    const filtered = tasks.filter(
+      (t) =>
+        t.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.description && t.description.toLowerCase().includes(searchTerm.toLowerCase())),
+    )
+
+    const newColumns = {
+      todo: { title: "To Do", items: [] },
+      in_progress: { title: "In Progress", items: [] },
+      done: { title: "Done", items: [] },
+    }
+
+    filtered.forEach((task) => {
+      let status = task.status?.toLowerCase().replace(/\s+/g, "_") || "todo"
+      if (status === "not_started") status = "todo"
+      if (status === "completed") status = "done"
+      if (!newColumns[status]) status = "todo"
+      newColumns[status].items.push(task)
+    })
+
+    setColumns(newColumns)
+  }, [tasks, searchTerm])
+
+  // Handle moving a task to a new status (column)
+  const handleMoveTask = async (taskId, newStatus) => {
+    if (taskUpdating) return false
+
+    let currentColumn = null
+    let task = null
+
+    for (const [colId, col] of Object.entries(columns)) {
+      const found = col.items.find((t) => t._id === taskId)
+      if (found) {
+        currentColumn = colId
+        task = found
+        break
       }
     }
-  }, []);
 
-  if (error) {
-    console.error('Error loading tasks:', error);
-    return <div className="p-4 text-red-500">Failed to load tasks</div>;
+    if (!task || currentColumn === newStatus) return false
+
+    return await updateTaskStatus(taskId, newStatus)
   }
 
-  // Filter tasks for the specific user if userId is provided
-  const filteredTasks = userId
-    ? tasks.filter(task => {
-        if (!task.assignedTo) return false;
-        
-        return task.assignedTo.some(user => {
-          // Check if user is an object with _id or id
-          if (typeof user === 'object') {
-            return user._id === userId || user.id === userId;
-          }
-          // Check if user is a string ID
-          return user === userId;
-        });
-      })
-    : tasks;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4B0082]"></div>
+      </div>
+    )
+  }
 
-  console.log('Filtered tasks by status:', {
-    todo: filteredTasks.filter(task => task.status === 'todo').length,
-    in_progress: filteredTasks.filter(task => task.status === 'in_progress').length,
-    done: filteredTasks.filter(task => task.status === 'done').length,
-  });
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[500px] text-red-500">
+        <AlertCircle size={48} className="mb-4" />
+        <h3 className="text-xl font-semibold mb-2">Error Loading Tasks</h3>
+        <p>{error.message || "Something went wrong. Please try again later."}</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Kanban Board</h2>
-      {tasks.length === 0 ? (
-        <div className="bg-yellow-100 p-4 rounded">
-          <p className="text-yellow-800">No tasks available. Either no tasks exist or your API may not be returning data correctly.</p>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h2 className="text-2xl font-bold text-[#4B0082]">Task Board</h2>
+
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-[#4B0082]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <select
+            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#4B0082]"
+            value={background}
+            onChange={(e) => setBackground(e.target.value)}
+          >
+            {backgroundOptions.map((option) => (
+              <option key={option.id} value={option.value}>
+                {option.name}
+              </option>
+            ))}
+          </select>
         </div>
-      ) : filteredTasks.length === 0 ? (
-        <div className="bg-blue-100 p-4 rounded">
-          <p className="text-blue-800">No tasks assigned to you. Check if your user ID ({userId}) matches what&apos;s in the task assignments.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {STATUSES.map((status) => (
+      </div>
+
+      <div className={`rounded-lg p-6 ${background}`}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {Object.entries(columns).map(([columnId, column]) => (
             <TaskColumn
-              key={status}
-              status={status}
-              tasks={filteredTasks.filter(task => task.status === status)}
+              key={columnId}
+              id={columnId}
+              title={column.title}
+              tasks={column.items}
               mutate={mutate}
               userRole={userRole}
+              onMoveTask={handleMoveTask}
             />
           ))}
         </div>
-      )}
+      </div>
     </div>
-  );
+  )
 }

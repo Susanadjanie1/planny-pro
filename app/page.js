@@ -9,39 +9,39 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Section */}
-     <section className="bg-[#4B0082] text-white">
-  <div className="max-w-7xl mx-auto py-20 px-6 md:px-10 flex flex-col md:flex-row items-center">
-    <div className="md:w-1/2 mb-10 md:mb-0">
-      <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-        Project Management Made <span className="text-[#FFD700]">Simple</span>
-      </h1>
-      <p className="text-lg text-gray-100 max-w-lg mb-8">
-        Organize your work and collaborate effortlessly with our smart
-        Kanban-style project management platform.
-      </p>
-      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-        <button
-          onClick={() => router.push("/auth/signup")}
-          className="bg-[#FFD700] hover:bg-[#d3c67b] text-indigo-900 font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center justify-center"
-        >
-          Get Started <FiArrowRight className="ml-2" />
-        </button>
-      </div>
-    </div>
+      <section className="bg-[#4B0082] text-white">
+        <div className="max-w-7xl mx-auto py-20 px-6 md:px-10 flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 mb-10 md:mb-0">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+              Project Management Made{" "}
+              <span className="text-[#FFD700]">Simple</span>
+            </h1>
+            <p className="text-lg text-gray-100 max-w-lg mb-8">
+              Organize your work and collaborate effortlessly with our smart
+              Kanban-style project management platform.
+            </p>
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <button
+                onClick={() => router.push("/auth/signup")}
+                className="bg-[#FFD700] hover:bg-[#d3c67b] text-indigo-900 font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center justify-center"
+              >
+                Get Started <FiArrowRight className="ml-2" />
+              </button>
+            </div>
+          </div>
 
-    {/* Image side */}
-    <div className="md:max-w-1/2 flex justify-center">
-      <Image
-        src="/sensational.jpg"
-        alt="PlannyPro Dashboard Preview"
-        width={600} // or adjust to your liking
-        height={500}
-        className="rounded-lg shadow-xl w-full h-auto max-w-md md:max-w-full"
-      />
-    </div>
-  </div>
-</section>
-
+          {/* Image side */}
+          <div className="md:max-w-1/2 flex justify-center">
+            <Image
+              src="/sensational.jpg"
+              alt="PlannyPro Dashboard Preview"
+              width={600}
+              height={500}
+              className="rounded-lg shadow-xl w-full h-auto max-w-md md:max-w-full"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section id="features" className="py-20 px-8 bg-gray-50">

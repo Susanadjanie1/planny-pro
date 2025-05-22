@@ -1,4 +1,3 @@
-// app/api/auth/signup/route.js
 import connectDB from 'lib/db';
 import User from 'app/models/User';
 import bcrypt from 'bcryptjs';

@@ -1,24 +1,24 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-// Add reaction schema for comments
+// Reaction schema for comments
 const ReactionSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     emoji: String,
   },
-  { _id: false },
-)
+  { _id: false }
+);
 
-// Enhanced comment schema
+// Comment schema
 const CommentSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   text: String,
   timestamp: { type: Date, default: Date.now },
-  parentId: { type: mongoose.Schema.Types.ObjectId, default: null }, // For threaded comments
-  reactions: [ReactionSchema], // For emoji reactions
-  edited: { type: Boolean, default: false }, // Track if comment was edited
-  editedAt: Date, // When the comment was edited
-})
+  parentId: { type: mongoose.Schema.Types.ObjectId, default: null },
+  reactions: [ReactionSchema],
+  edited: { type: Boolean, default: false },
+  editedAt: Date,
+});
 
 const TaskSchema = new mongoose.Schema(
   {
@@ -48,11 +48,21 @@ const TaskSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    comments: [CommentSchema], // Using the enhanced comment schema
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    lastAssignedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    comments: [CommentSchema],
     timeLogs: [
       {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        hours: Number,
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        hours: { type: Number, required: true },
+        email: String, // fixed typo here
         date: { type: Date, default: Date.now },
       },
     ],
@@ -60,7 +70,14 @@ const TaskSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
-)
+  }
+);
 
-export default mongoose.models.Task || mongoose.model("Task", TaskSchema)
+// During development, delete existing model to prevent recompilation errors
+if (process.env.NODE_ENV !== "production") {
+  if (mongoose.models.Task) {
+    delete mongoose.models.Task;
+  }
+}
+
+export default mongoose.models.Task || mongoose.model("Task", TaskSchema);

@@ -1,52 +1,56 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import { useState, useEffect } from "react"
+import { toast } from "react-toastify"
 
-export default function ProjectEditModal({
-  isOpen,
-  onClose,
-  project,
-  onUpdated,
-}) {
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
+export default function ProjectEditModal({ isOpen, onClose, project, onUpdated }) {
+  const [editTitle, setEditTitle] = useState("")
+  const [editDescription, setEditDescription] = useState("")
 
   useEffect(() => {
     if (isOpen && project) {
-      setEditTitle(project.title || "");
-      setEditDescription(project.description || "");
+      setEditTitle(project.title || "")
+      setEditDescription(project.description || "")
     }
-  }, [project, isOpen]);
+  }, [project, isOpen])
 
   const saveEdit = async () => {
     if (!project || !project._id) {
-      toast.error("Invalid project ID");
-      return;
+      toast.error("Invalid project ID")
+      return
     }
 
     try {
+      const token = localStorage.getItem("token")
+
       const res = await fetch(`/api/projects/${project._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: editTitle, description: editDescription }),
-      });
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: editTitle,
+          description: editDescription,
+        }),
+      })
 
       if (res.ok) {
-        const updated = await res.json();
-        toast.success('Project updated successfully');
-        onUpdated(updated); // Notify the parent component about the update
-        onClose(); // Close the modal after updating
+        const updated = await res.json()
+        toast.success("Project updated successfully")
+        onUpdated(updated)
+        onClose()
       } else {
-        const errorData = await res.json();
-        toast.error(errorData.error || 'Update failed');
+        const errorData = await res.json()
+        toast.error(errorData.error || "Update failed")
       }
     } catch (err) {
-      toast.error('An unexpected error occurred');
+      console.error("Project update error:", err)
+      toast.error("An unexpected error occurred")
     }
-  };
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -63,22 +67,17 @@ export default function ProjectEditModal({
           value={editDescription}
           onChange={(e) => setEditDescription(e.target.value)}
           placeholder="Project Description"
+          rows={4}
         />
         <div className="flex justify-end gap-2">
-          <button
-            className="bg-gray-500 text-white px-4 py-2 rounded"
-            onClick={onClose}
-          >
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={onClose}>
             Cancel
           </button>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={saveEdit}
-          >
+          <button className="bg-[#4B0082] text-white px-4 py-2 rounded hover:bg-[#4B0082]/90" onClick={saveEdit}>
             Save
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

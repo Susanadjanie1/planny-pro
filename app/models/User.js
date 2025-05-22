@@ -1,7 +1,5 @@
-// app/models/User.js
-
-import mongoose from 'mongoose';
-import { ROLES } from 'lib/constants';
+import mongoose from "mongoose";
+import { ROLES } from "../../lib/constants"
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -9,7 +7,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  password: { // <-- Add this field if missing
+  password: {
     type: String,
     required: true,
   },
@@ -18,6 +16,10 @@ const userSchema = new mongoose.Schema({
     enum: Object.values(ROLES),
     default: ROLES.MEMBER,
   },
-});
 
-export default mongoose.models.User || mongoose.model('User', userSchema);
+  // Add these new fields for password reset functionality
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+}, { timestamps: true });
+
+export default mongoose.models.User || mongoose.model("User", userSchema);

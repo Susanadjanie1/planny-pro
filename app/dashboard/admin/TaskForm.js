@@ -30,9 +30,9 @@ export default function TaskForm({ projectId, selectedTask, onTaskSaved }) {
         if (!res.ok) throw new Error("Unauthorized or failed");
 
         const data = await res.json();
-        const userOptions = data.map((user) => ({
+        const userOptions = data.users.map((user) => ({
           value: user.email,
-          label: user.email,
+          label: `${user.email} (${user.role})`,
         }));
         setUsers(userOptions);
       } catch (error) {
@@ -141,42 +141,49 @@ export default function TaskForm({ projectId, selectedTask, onTaskSaved }) {
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-lg">
-            <h3 className="text-xl font-semibold">
-              {selectedTask ? "Edit Task" : "Create Task"}
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                {selectedTask ? "Edit Task" : "Create Task"}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm">Title</label>
+                <label className="block text-sm font-medium mb-1">Title</label>
                 <input
                   type="text"
                   name="title"
                   value={task.title}
                   onChange={handleChange}
-                  className="w-full p-2 border border-gray-300 rounded"
                   required
+                  className="w-full p-2 border border-gray-300 rounded"
                 />
               </div>
 
               <div>
-                <label className="block text-sm">Description</label>
+                <label className="block text-sm font-medium mb-1">Description</label>
                 <textarea
                   name="description"
                   value={task.description}
                   onChange={handleChange}
+                  rows={3}
                   className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
+                ></textarea>
               </div>
 
               <div>
-                <label className="block text-sm">Priority</label>
+                <label className="block text-sm font-medium mb-1">Priority</label>
                 <select
                   name="priority"
                   value={task.priority}
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
-                  required
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -185,7 +192,7 @@ export default function TaskForm({ projectId, selectedTask, onTaskSaved }) {
               </div>
 
               <div>
-                <label className="block text-sm">Due Date</label>
+                <label className="block text-sm font-medium mb-1">Due Date</label>
                 <input
                   type="date"
                   name="dueDate"
@@ -196,31 +203,24 @@ export default function TaskForm({ projectId, selectedTask, onTaskSaved }) {
               </div>
 
               <div>
-                <label className="block text-sm">Assign To</label>
+                <label className="block text-sm font-medium mb-1">Assign To</label>
                 <Select
                   isMulti
                   name="assignedTo"
+                  options={users}
                   value={users.filter((user) =>
                     task.assignedTo.includes(user.value)
                   )}
                   onChange={handleAssignChange}
-                  options={users}
-                  className="w-full"
-                  placeholder="Select team members..."
+                  className="basic-multi-select"
+                  classNamePrefix="select"
                 />
               </div>
 
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Close
-                </button>
+              <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#4B0082] text-white px-4 py-2 rounded hover:bg-[#967fa7]"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
                 >
                   {selectedTask ? "Update Task" : "Create Task"}
                 </button>

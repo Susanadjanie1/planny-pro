@@ -120,7 +120,7 @@ export default function LoginPage() {
               </label>
             </div>
             <a
-              href="/forgot-password"
+              href="/auth/forgot-password"
               className="text-sm font-medium"
               style={{ color: "#4B0082", hover: { color: "#FFD700" } }}
             >

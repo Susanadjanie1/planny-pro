@@ -34,7 +34,10 @@ export default function SignupPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-bold text-center" style={{ color: "#4B0082" }}>
+        <h2
+          className="text-3xl font-bold text-center"
+          style={{ color: "#4B0082" }}
+        >
           Sign Up
         </h2>
 
@@ -51,7 +54,12 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -63,7 +71,12 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -75,7 +88,12 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Role
+            </label>
             <select
               id="role"
               value={form.role}
