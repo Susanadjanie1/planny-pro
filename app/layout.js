@@ -17,6 +17,14 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Planny Pro",
   description: "A smart project management tool",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico", rel: "icon" },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -25,9 +33,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-         
-        >
+        <ThemeProvider>
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <div className="flex flex-1">
@@ -42,7 +48,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
-
-
-

@@ -33,7 +33,7 @@ export default function LandingPage() {
           {/* Image side */}
           <div className="md:max-w-1/2 flex justify-center">
             <Image
-              src="/sensational.jpg"
+              src="/Kanban3.png"
               alt="PlannyPro Dashboard Preview"
               width={600}
               height={500}

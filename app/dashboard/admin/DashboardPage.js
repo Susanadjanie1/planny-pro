@@ -1,69 +1,76 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { toast } from "react-toastify"
-import { Download, FilePlus, ListTodo, PlusCircle } from "lucide-react"
-import Sidebar from "../../components/Sidebar"
-import ProjectForm from "../../dashboard/admin/ProjectForm"
-import ProjectList from "./projects/ProjectList"
-import TaskForm from "./TaskForm"
-import TaskList from "./tasks/TaskList"
-import SearchBar from "../../components/SearchBar"
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { Download, FilePlus, ListTodo, PlusCircle } from "lucide-react";
+import Sidebar from "../../components/Sidebar";
+import ProjectForm from "../../dashboard/admin/ProjectForm";
+import ProjectList from "./projects/ProjectList";
+import TaskForm from "./TaskForm";
+import TaskList from "./tasks/TaskList";
+import SearchBar from "../../components/SearchBar";
 
 export default function DashboardPage({ session }) {
-  const [refreshFlag, setRefreshFlag] = useState(0)
-  const [selectedProjectId, setSelectedProjectId] = useState(null)
-  const [taskToEdit, setTaskToEdit] = useState(null)
-  const [activeView, setActiveView] = useState("dashboard")
+  const [refreshFlag, setRefreshFlag] = useState(0);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [activeView, setActiveView] = useState("dashboard");
 
-  const displayName = session?.email || "Admin"
+  const displayName = session?.email || "Admin";
 
   const handleExport = async (projectId) => {
-    const res = await fetch(`/api/reports/${projectId}`)
+    const res = await fetch(`/api/reports/${projectId}`);
     if (!res.ok) {
-      toast.error("Report generation failed")
-      return
+      toast.error("Report generation failed");
+      return;
     }
-    const blob = await res.blob()
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `project-${projectId}-report.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
-    toast.success("Project report downloaded")
-  }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `project-${projectId}-report.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success("Project report downloaded");
+  };
 
   useEffect(() => {
     if (selectedProjectId) {
-      setActiveView("tasks")
+      setActiveView("tasks");
     }
-  }, [selectedProjectId])
+  }, [selectedProjectId]);
 
   const handleSearchResultSelect = (type, id) => {
     if (type === "project") {
-      setSelectedProjectId(id)
-      setActiveView("tasks")
+      setSelectedProjectId(id);
+      setActiveView("tasks");
     } else if (type === "task") {
-      // Instead of fetching the task details, just navigate to the all tasks view
-      // and let the user find the task in the list
-      setActiveView("allTasks")
-
-      // Optionally, you could set a state to highlight this task in the list
-      // or scroll to it, but that would require additional changes to TaskList
-
-      // If you really need to navigate to the specific project containing this task,
-      // you could modify the tasks/search endpoint to include the projectId in the
-      // search results, then use that directly instead of making another API call
+      // Set the selected task ID and switch to all tasks view
+      setActiveView("allTasks");
+      // Add a slight delay to ensure the TaskList component is mounted
+      setTimeout(() => {
+        const taskElement = document.getElementById(`task-${id}`);
+        if (taskElement) {
+          taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          taskElement.classList.add("highlight-task");
+          setTimeout(
+            () => taskElement.classList.remove("highlight-task"),
+            2000
+          );
+        }
+      }, 100);
     }
-  }
+  };
 
   const renderActiveView = () => {
     switch (activeView) {
       case "dashboard":
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-6" style={{ color: "#4B0082" }}>
+            <h2
+              className="text-2xl font-semibold mb-6"
+              style={{ color: "#4B0082" }}
+            >
               Quick Actions
             </h2>
             <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
@@ -112,74 +119,86 @@ export default function DashboardPage({ session }) {
               </div>
             </div>
           </div>
-        )
+        );
 
       case "createProject":
         return (
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-            <h2 className="text-2xl font-semibold mb-4" style={{ color: "#4B0082" }}>
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{ color: "#4B0082" }}
+            >
               Create New Project
             </h2>
             <ProjectForm
               onProjectCreated={() => {
-                setRefreshFlag((prev) => prev + 1)
-                toast.success("Project created successfully")
-                setActiveView("projects")
+                setRefreshFlag((prev) => prev + 1);
+                toast.success("Project created successfully");
+                setActiveView("projects");
               }}
             />
           </div>
-        )
+        );
 
       case "projects":
         return (
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-            <h2 className="text-2xl font-semibold mb-4" style={{ color: "#4B0082" }}>
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{ color: "#4B0082" }}
+            >
               {/* Your Projects */}
             </h2>
             <ProjectList
               refreshFlag={refreshFlag}
               onProjectSelect={(id) => {
-                setSelectedProjectId(id)
-                setActiveView("tasks")
+                setSelectedProjectId(id);
+                setActiveView("tasks");
               }}
             />
             <div className="mb-4 flex justify-end"></div>
           </div>
-        )
+        );
 
       case "createTask":
         return (
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-            <h2 className="text-2xl font-semibold mb-4" style={{ color: "#4B0082" }}>
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{ color: "#4B0082" }}
+            >
               Create New Task
             </h2>
             <TaskForm
               projectId={selectedProjectId}
               onTaskSaved={() => {
-                setRefreshFlag((prev) => prev + 1)
+                setRefreshFlag((prev) => prev + 1);
                 // toast.success("Task created successfully")
-                setActiveView("allTasks")
+                setActiveView("allTasks");
               }}
             />
           </div>
-        )
+        );
 
       case "allTasks":
         return (
           <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold" style={{ color: "#4B0082" }}></h2>
+              <h2
+                className="text-2xl font-semibold"
+                style={{ color: "#4B0082" }}
+              ></h2>
             </div>
 
             <TaskList
               refreshFlag={refreshFlag}
-              onEditTask={(task) => {
-                setTaskToEdit(task)
-                setActiveView("createTask")
+              onEditTask={(tasks) => {
+                setTaskToEdit(tasks);
+                setActiveView("createTask");
               }}
             />
           </div>
-        )
+        );
 
       case "tasks":
         return selectedProjectId ? (
@@ -194,13 +213,17 @@ export default function DashboardPage({ session }) {
               </button>
             </div>
 
-            <TaskList projectId={selectedProjectId} refreshFlag={refreshFlag} onEditTask={setTaskToEdit} />
+            <TaskList
+              projectId={selectedProjectId}
+              refreshFlag={refreshFlag}
+              onEditTask={setTaskToEdit}
+            />
 
             <div className="pt-4">
               <button
                 onClick={() => {
-                  setSelectedProjectId(null)
-                  setActiveView("projects")
+                  setSelectedProjectId(null);
+                  setActiveView("projects");
                 }}
                 className="text-[#4B0082] hover:text-indigo-800"
               >
@@ -210,7 +233,9 @@ export default function DashboardPage({ session }) {
           </div>
         ) : (
           <div className="text-center p-10 bg-white rounded-2xl shadow-md border border-gray-100">
-            <p className="text-gray-600 text-lg">No project selected. Please select a project first.</p>
+            <p className="text-gray-600 text-lg">
+              No project selected. Please select a project first.
+            </p>
             <button
               onClick={() => setActiveView("projects")}
               className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
@@ -218,16 +243,18 @@ export default function DashboardPage({ session }) {
               View Projects
             </button>
           </div>
-        )
+        );
 
       default:
         return (
           <div className="text-center p-10 bg-white rounded-2xl shadow-md border border-gray-100">
-            <p className="text-gray-600 text-lg">Select an option from the sidebar</p>
+            <p className="text-gray-600 text-lg">
+              Select an option from the sidebar
+            </p>
           </div>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100">
@@ -251,12 +278,15 @@ export default function DashboardPage({ session }) {
             </div>
 
             {/* Global Search Bar */}
-            <SearchBar onResultSelect={handleSearchResultSelect} className="w-full md:w-96" />
+            <SearchBar
+              onResultSelect={handleSearchResultSelect}
+              className="w-full md:w-96"
+            />
           </div>
         </div>
 
         {renderActiveView()}
       </div>
     </div>
-  )
+  );
 }

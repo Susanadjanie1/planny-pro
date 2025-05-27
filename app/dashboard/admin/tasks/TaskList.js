@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TaskForm from "../TaskForm";
-import { fetcherWithAuth } from "../../../../lib/fetcherWithAuth"
-import CommentSection from "../../../components/CommentSection"
+import { fetcherWithAuth } from "../../../../lib/fetcherWithAuth";
+import CommentSection from "../../../components/CommentSection";
+import TaskCard from "../../../kanban/TaskCard";
 import {
   MessageSquare,
   Edit,
@@ -15,6 +16,7 @@ import {
   ChevronUp,
   MoreHorizontal,
 } from "lucide-react";
+import React from "react";
 
 export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
   const [tasks, setTasks] = useState([]);
@@ -171,6 +173,23 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
 
   return (
     <div className="mt-8">
+      <style jsx global>{`
+        .highlight-task {
+          animation: highlight 2s ease-in-out;
+        }
+
+        @keyframes highlight {
+          0% {
+            background-color: rgba(79, 70, 229, 0.1);
+          }
+          50% {
+            background-color: rgba(79, 70, 229, 0.1);
+          }
+          100% {
+            background-color: transparent;
+          }
+        }
+      `}</style>
       <h3 className="text-2xl font-semibold mb-4 text-[#4B0082]">
         {projectId ? "Project Tasks" : "All Tasks"}
       </h3>
@@ -195,44 +214,44 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                   {!projectId && (
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6"
                     >
                       Project
                     </th>
                   )}
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4"
                   >
                     Title
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
                   >
                     Priority
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
                   >
                     Status
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
                   >
                     Due Date
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6"
                   >
                     Assigned To
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8"
                   >
                     Actions
                   </th>
@@ -240,10 +259,10 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {tasks.map((task) => (
-                  <>
-                    <tr key={task._id} className="hover:bg-gray-50">
+                  <React.Fragment key={task._id}>
+                    <tr id={`task-${task._id}`} className="hover:bg-gray-50">
                       {!projectId && (
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap w-1/6">
                           {task.projectName && (
                             <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
                               {task.projectName}
@@ -251,7 +270,7 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                           )}
                         </td>
                       )}
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 w-1/4">
                         <div className="text-sm font-medium text-gray-900">
                           {task.title}
                         </div>
@@ -289,7 +308,7 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap w-1/8">
                         <span
                           className={`text-xs font-semibold px-2 py-1 rounded-full ${
                             task.priority === "high"
@@ -302,17 +321,17 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                           {task.priority}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap w-1/8">
                         <span className="text-sm text-gray-700">
                           {task.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap w-1/8">
                         <span className="text-sm text-gray-700">
                           {task.dueDate?.slice(0, 10) || "Not set"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap w-1/6">
                         <div className="flex -space-x-2">
                           {task.assignedTo?.length > 0 ? (
                             task.assignedTo.map((user, idx) => (
@@ -332,8 +351,7 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                           )}
                         </div>
                       </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap w-1/8">
                         <div className="flex items-center space-x-3">
                           <button
                             onClick={() => toggleComments(task._id)}
@@ -370,7 +388,7 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                     </tr>
                     {/* Expandable row for comments */}
                     {openComments[task._id] && (
-                      <tr key={`comments-${task._id}`}>
+                      <tr>
                         <td
                           colSpan={projectId ? 6 : 7}
                           className="px-6 py-4 bg-gray-50"
@@ -384,7 +402,7 @@ export default function TaskList({ projectId, refreshFlag, onTaskEdited }) {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

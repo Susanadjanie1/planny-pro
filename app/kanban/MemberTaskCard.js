@@ -1,51 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Calendar, Clock, MoreVertical, CheckCircle, Timer, ArrowRight } from "lucide-react"
-import { format } from "date-fns"
-import { toast } from "react-toastify"
-import CommentSection from "../components/CommentSection"
+import { useState } from "react";
+import {
+  Calendar,
+  Clock,
+  MoreVertical,
+  CheckCircle,
+  Timer,
+  ArrowRight,
+} from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "react-toastify";
+import CommentSection from "../components/CommentSection";
 
 export default function MemberTaskCard({ task, mutate, onMoveTask }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [timeLogOpen, setTimeLogOpen] = useState(false)
-  const [commentsOpen, setCommentsOpen] = useState(false)
-  const [timeSpent, setTimeSpent] = useState("")
-  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [showTimeLogs, setShowTimeLogs] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [timeLogOpen, setTimeLogOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [timeSpent, setTimeSpent] = useState("");
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showTimeLogs, setShowTimeLogs] = useState(false);
 
-  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null
-  const userEmail = typeof window !== "undefined" ? localStorage.getItem("email") : null
+  const userId =
+    typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const userEmail =
+    typeof window !== "undefined" ? localStorage.getItem("email") : null;
 
   const formatDate = (dateString) => {
-    if (!dateString) return "No date"
+    if (!dateString) return "No date";
     try {
-      return format(new Date(dateString), "MMM dd, yyyy")
+      return format(new Date(dateString), "MMM dd, yyyy");
     } catch {
-      return "Invalid date"
+      return "Invalid date";
     }
-  }
+  };
 
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
       case "high":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
       case "medium":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
       case "low":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
     }
-  }
+  };
 
   const handleStatusChange = async (newStatus) => {
-    if (isUpdating) return
+    if (isUpdating) return;
 
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch(`/api/tasks/${task._id}`, {
         method: "PUT",
         headers: {
@@ -53,50 +62,52 @@ export default function MemberTaskCard({ task, mutate, onMoveTask }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
-      })
+      });
 
-      if (!response.ok) throw new Error("Failed to update status")
+      if (!response.ok) throw new Error("Failed to update status");
 
-      if (mutate) await mutate()
+      if (mutate) await mutate();
 
-      toast?.success?.("Status updated")
+      toast?.success?.("Status updated");
     } catch (error) {
-      console.error("Error updating status:", error)
-      toast?.error?.(`Error: ${error.message}`)
+      console.error("Error updating status:", error);
+      toast?.error?.(`Error: ${error.message}`);
     } finally {
-      setIsUpdating(false)
-      setStatusDropdownOpen(false)
-      setMenuOpen(false)
+      setIsUpdating(false);
+      setStatusDropdownOpen(false);
+      setMenuOpen(false);
     }
-  }
+  };
 
   const handleLogTime = async () => {
-    if (!timeSpent || isUpdating) return
+    if (!timeSpent || isUpdating) return;
 
     // Support both formats: hours (2h) and minutes (30m)
-    const timeRegex = /^\d+(\.\d+)?[hm]?$/
+    const timeRegex = /^\d+(\.\d+)?[hm]?$/;
     if (!timeRegex.test(timeSpent)) {
-      toast?.error?.("Please use format like '2h', '30m', or just a number for hours")
-      return
+      toast?.error?.(
+        "Please use format like '2h', '30m', or just a number for hours"
+      );
+      return;
     }
 
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
 
       // Parse the time input
-      let hours
+      let hours;
       if (timeSpent.endsWith("h")) {
-        hours = Number.parseFloat(timeSpent.slice(0, -1))
+        hours = Number.parseFloat(timeSpent.slice(0, -1));
       } else if (timeSpent.endsWith("m")) {
-        hours = Number.parseFloat(timeSpent.slice(0, -1)) / 60
+        hours = Number.parseFloat(timeSpent.slice(0, -1)) / 60;
       } else {
-        hours = Number.parseFloat(timeSpent)
+        hours = Number.parseFloat(timeSpent);
       }
 
-      if (isNaN(hours)) throw new Error("Invalid time format")
+      if (isNaN(hours)) throw new Error("Invalid time format");
 
-      console.log("Logging time:", { taskId: task._id, userId, hours })
+      console.log("Logging time:", { taskId: task._id, userId, hours });
 
       // Note: Using [id] instead of [taskId] in the API route path
       const response = await fetch(`/api/tasks/${task._id}/logtime`, {
@@ -109,71 +120,83 @@ export default function MemberTaskCard({ task, mutate, onMoveTask }) {
           userId: userId,
           hours: hours,
         }),
-      })
+      });
 
       // Check if response is OK before trying to parse JSON
       if (!response.ok) {
-        let errorMessage = "Failed to log time"
+        let errorMessage = "Failed to log time";
         try {
-          const errorData = await response.json()
-          errorMessage = errorData.error || errorMessage
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
         } catch {
           // If JSON parsing fails, use status text
-          errorMessage = `${errorMessage}: ${response.status} ${response.statusText}`
+          errorMessage = `${errorMessage}: ${response.status} ${response.statusText}`;
         }
-        throw new Error(errorMessage)
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json()
-      console.log("Log time response:", data)
+      const data = await response.json();
+      console.log("Log time response:", data);
 
       // Refresh tasks data
-      if (mutate) await mutate()
+      if (mutate) await mutate();
 
-      setTimeLogOpen(false)
-      setTimeSpent("")
-      setShowTimeLogs(true)
-      toast?.success?.("Time logged successfully")
+      setTimeLogOpen(false);
+      setTimeSpent("");
+      setShowTimeLogs(true);
+      toast?.success?.("Time logged successfully");
     } catch (error) {
-      console.error("Error logging time:", error)
-      toast?.error?.(`Error: ${error.message}`)
+      console.error("Error logging time:", error);
+      toast?.error?.(`Error: ${error.message}`);
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
   function formatTimeDisplay(hours) {
     if (hours >= 1) {
-      const h = Math.floor(hours)
-      const m = Math.round((hours - h) * 60)
-      return m > 0 ? `${h}h ${m}m` : `${h}h`
+      const h = Math.floor(hours);
+      const m = Math.round((hours - h) * 60);
+      return m > 0 ? `${h}h ${m}m` : `${h}h`;
     }
-    return `${Math.round(hours * 60)}m`
+    return `${Math.round(hours * 60)}m`;
   }
 
   function formatDateTime(date) {
-    return new Date(date).toLocaleString()
+    return new Date(date).toLocaleString();
   }
 
   function getUserDisplay(user) {
-    if (!user) return "Unknown"
+    if (!user) return "Unknown";
     if (typeof user === "object") {
-      return user.email || user.name || "Unknown User"
+      // First check for email in the time log itself
+      if (user.email) return user.email;
+      // Then check for email in the user object if it's populated
+      if (user.userId && user.userId.email) return user.userId.email;
+      // Finally check for name
+      if (user.name) return user.name;
+      return "Unknown User";
     }
-    return user
+    return user;
   }
 
-  const totalTimeLogged = (task.timeLogs || []).reduce((acc, log) => acc + (log.hours || 0), 0)
+  const totalTimeLogged = (task.timeLogs || []).reduce(
+    (acc, log) => acc + (log.hours || 0),
+    0
+  );
 
   // Check if the current user is assigned to this task
   const isAssignedToCurrentUser = task.assignedTo?.some(
-    (user) => user.email === userEmail || user._id === userId || user.userId === userId,
-  )
+    (user) =>
+      user.email === userEmail || user._id === userId || user.userId === userId
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start">
-        <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
+        <h4 className="font-medium text-gray-900 dark:text-white">
+          {task.title}
+        </h4>
         <div className="relative">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -218,13 +241,21 @@ export default function MemberTaskCard({ task, mutate, onMoveTask }) {
       </div>
 
       {task.description && (
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{task.description}</p>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+          {task.description}
+        </p>
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
         {/* Priority display (read-only) */}
         {task.priority && (
-          <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>{task.priority}</span>
+          <span
+            className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
+              task.priority
+            )}`}
+          >
+            {task.priority}
+          </span>
         )}
         {task.tags?.map((tag, index) => (
           <span
@@ -330,9 +361,17 @@ export default function MemberTaskCard({ task, mutate, onMoveTask }) {
       {showTimeLogs && task.timeLogs && task.timeLogs.length > 0 && (
         <div className="mt-3 text-xs max-h-48 overflow-auto border-t border-gray-200 dark:border-gray-700 pt-2">
           {task.timeLogs.map((log) => (
-            <div key={log._id || log.id} className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-700">
-              <div>{getUserDisplay(log.user)} logged {formatTimeDisplay(log.hours)}</div>
-              <div className="text-gray-400 dark:text-gray-500">{formatDateTime(log.date)}</div>
+            <div
+              key={log._id || log.id}
+              className="flex justify-between py-1 border-b border-gray-100 dark:border-gray-700"
+            >
+              <div>
+                {log.email || getUserDisplay(log.userId)} logged{" "}
+                {formatTimeDisplay(log.hours)}
+              </div>
+              <div className="text-gray-400 dark:text-gray-500">
+                {formatDateTime(log.date)}
+              </div>
             </div>
           ))}
         </div>
@@ -344,11 +383,19 @@ export default function MemberTaskCard({ task, mutate, onMoveTask }) {
           onClick={() => setCommentsOpen(!commentsOpen)}
           className="text-blue-600 hover:underline text-sm"
         >
-          {commentsOpen ? "Hide Comments" : `Comments (${task.comments ? task.comments.length : 0})`}
+          {commentsOpen
+            ? "Hide Comments"
+            : `Comments (${task.comments ? task.comments.length : 0})`}
         </button>
 
-        {commentsOpen && <CommentSection taskId={task._id} comments={task.comments} mutate={mutate} />}
+        {commentsOpen && (
+          <CommentSection
+            taskId={task._id}
+            comments={task.comments}
+            mutate={mutate}
+          />
+        )}
       </div>
     </div>
-  )
+  );
 }

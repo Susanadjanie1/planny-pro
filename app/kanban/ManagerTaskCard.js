@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -12,134 +12,145 @@ import {
   Users,
   ArrowRight,
   Flag,
-} from "lucide-react"
-import { format } from "date-fns"
-import CommentSection from "../components/CommentSection"
+} from "lucide-react";
+import { format } from "date-fns";
+import CommentSection from "../components/CommentSection";
+import { toast } from "react-toastify";
 
-export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = false }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [assignDropdownOpen, setAssignDropdownOpen] = useState(false)
-  const [commentsOpen, setCommentsOpen] = useState(false)
-  const [availableUsers, setAvailableUsers] = useState([])
-  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
-  const [priorityDropdownOpen, setPriorityDropdownOpen] = useState(false)
-  const [currentUserId, setCurrentUserId] = useState("")
-  const [isUpdating, setIsUpdating] = useState(false)
+export default function ManagerTaskCard({
+  task,
+  mutate,
+  onMoveTask,
+  isAdmin = false,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [assignDropdownOpen, setAssignDropdownOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [priorityDropdownOpen, setPriorityDropdownOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Get current user ID
   useEffect(() => {
-    const userId = localStorage.getItem("userId")
+    const userId = localStorage.getItem("userId");
     if (userId) {
-      setCurrentUserId(userId)
+      setCurrentUserId(userId);
     }
-  }, [])
+  }, []);
 
   // Fetch available users for assignment
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token");
         const response = await fetch("/api/users", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        })
+        });
 
         if (response.ok) {
-          const data = await response.json()
-          console.log("Available users for assignment:", data.users)
+          const data = await response.json();
 
-          // Filter out current user if they're a manager
+          // Filter users based on role
           const filteredUsers = data.users.filter((user) => {
-            // If admin, show all users
-            if (isAdmin) return true
-            // If manager, don't show self in the list and only show members
-            return user._id !== currentUserId && user.role === "member"
-          })
+            if (isAdmin) return true; // Admin can assign to anyone
+            return user.role === "member"; // Managers can only assign to members
+          });
 
-          setAvailableUsers(filteredUsers || [])
+          // Sort users by role and name/email
+          const sortedUsers = filteredUsers.sort((a, b) => {
+            if (a.role === b.role) {
+              return (a.name || a.email).localeCompare(b.name || b.email);
+            }
+            return a.role === "member" ? -1 : 1;
+          });
+
+          setAvailableUsers(sortedUsers || []);
+        } else {
+          console.error("Failed to fetch users:", response.statusText);
         }
       } catch (error) {
-        console.error("Error fetching users:", error)
+        console.error("Error fetching users:", error);
       }
-    }
+    };
 
-    if (currentUserId) {
-      fetchUsers()
-    }
-  }, [currentUserId, isAdmin])
+    fetchUsers();
+  }, [isAdmin]);
 
   const formatDate = (dateString) => {
-    if (!dateString) return "No date"
+    if (!dateString) return "No date";
     try {
-      return format(new Date(dateString), "MMM dd, yyyy")
+      return format(new Date(dateString), "MMM dd, yyyy");
     } catch (error) {
-      return "Invalid date"
+      return "Invalid date";
     }
-  }
+  };
 
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
       case "high":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+        return "bg-red-300 text-red-800 dark:bg-red-900/30 dark:text-red-300";
       case "medium":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+        return "bg-yellow-300 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
       case "low":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+        return "bg-green-300 text-green-800 dark:bg-green-900/30 dark:text-green-300";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
     }
-  }
+  };
 
   const handleDelete = async () => {
     if (!isAdmin) {
-      return
+      return;
     }
 
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch(`/api/tasks/${task._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete task")
+        throw new Error("Failed to delete task");
       }
 
       // Refresh tasks
       if (mutate) {
-        await mutate()
+        await mutate();
       }
     } catch (error) {
-      console.error("Error deleting task:", error)
+      console.error("Error deleting task:", error);
     }
 
-    setMenuOpen(false)
-  }
+    setMenuOpen(false);
+  };
 
   const handleEdit = () => {
     // Implementation for edit functionality
-    setMenuOpen(false)
-  }
+    setMenuOpen(false);
+  };
 
   const handleComplete = async () => {
     if (onMoveTask && !isUpdating) {
-      setIsUpdating(true)
-      await onMoveTask(task._id, "done")
-      setIsUpdating(false)
+      setIsUpdating(true);
+      await onMoveTask(task._id, "done");
+      setIsUpdating(false);
     }
-    setMenuOpen(false)
-  }
+    setMenuOpen(false);
+  };
 
   const handleAssign = async (email) => {
-    if (isUpdating) return
+    if (isUpdating) return;
 
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch(`/api/tasks/${task._id}/assign`, {
         method: "PUT",
         headers: {
@@ -147,45 +158,48 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ assignedTo: [email] }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to assign task")
+        const error = await response.json();
+        throw new Error(error.message || "Failed to assign task");
       }
 
       // Refresh tasks data
       if (mutate) {
-        await mutate()
+        await mutate();
       }
-      setAssignDropdownOpen(false)
+      setAssignDropdownOpen(false);
     } catch (error) {
-      console.error("Error assigning task:", error)
+      console.error("Error assigning task:", error);
+      // Show error toast or message to user
+      toast.error(error.message || "Failed to assign task");
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
   // Update the handleMoveTask function to prevent task duplication
   const handleMoveTaskTo = async (status) => {
     if (onMoveTask && !isUpdating) {
-      setIsUpdating(true)
-      const success = await onMoveTask(task._id, status)
-      setIsUpdating(false)
+      setIsUpdating(true);
+      const success = await onMoveTask(task._id, status);
+      setIsUpdating(false);
 
       if (success) {
-        setStatusDropdownOpen(false)
-        setMenuOpen(false)
+        setStatusDropdownOpen(false);
+        setMenuOpen(false);
       }
     }
-  }
+  };
 
   // Ensure the priority dropdown works correctly
   const handleChangePriority = async (priority) => {
-    if (isUpdating) return
+    if (isUpdating) return;
 
-    setIsUpdating(true)
+    setIsUpdating(true);
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch(`/api/tasks/${task._id}`, {
         method: "PUT",
         headers: {
@@ -193,28 +207,30 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ priority }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update priority")
+        throw new Error("Failed to update priority");
       }
 
       // Refresh tasks data
       if (mutate) {
-        await mutate()
+        await mutate();
       }
-      setPriorityDropdownOpen(false)
+      setPriorityDropdownOpen(false);
     } catch (error) {
-      console.error("Error updating priority:", error)
+      console.error("Error updating priority:", error);
     } finally {
-      setIsUpdating(false)
+      setIsUpdating(false);
     }
-  }
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start">
-        <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
+        <h4 className="font-medium text-gray-900 dark:text-white">
+          {task.title}
+        </h4>
         <div className="relative">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -279,14 +295,18 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
       </div>
 
       {task.description && (
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{task.description}</p>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+          {task.description}
+        </p>
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <div className="relative">
           <button
             onClick={() => setPriorityDropdownOpen(!priorityDropdownOpen)}
-            className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)} hover:opacity-80`}
+            className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
+              task.priority
+            )} hover:opacity-80`}
             disabled={isUpdating}
           >
             {task.priority || "No Priority"}
@@ -305,7 +325,7 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
                 </button>
                 <button
                   onClick={() => handleChangePriority("medium")}
-                  className="flex items-center w-full px-4 py-2 text-sm text-orange-600 dark:text-orange-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center w-full px-4 py-2 text-sm text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   disabled={isUpdating}
                 >
                   <Flag size={14} className="mr-2" />
@@ -343,9 +363,19 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
             disabled={isUpdating}
           >
             <span>
-              Status: {task.status ? task.status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) : "To Do"}
+              Status:{" "}
+              {task.status
+                ? task.status
+                    .replace(/_/g, " ")
+                    .replace(/\b\w/g, (l) => l.toUpperCase())
+                : "To Do"}
             </span>
-            <ArrowRight size={14} className={`transition-transform ${statusDropdownOpen ? "rotate-90" : ""}`} />
+            <ArrowRight
+              size={14}
+              className={`transition-transform ${
+                statusDropdownOpen ? "rotate-90" : ""
+              }`}
+            />
           </button>
 
           {statusDropdownOpen && (
@@ -408,32 +438,43 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
           <div className="relative">
             <button
               onClick={() => setAssignDropdownOpen(!assignDropdownOpen)}
-              className="flex items-center text-xs text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+              className="flex items-center text-xs text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 gap-1"
               disabled={isUpdating}
             >
-              <Users size={14} className="mr-1" />
-              {task.assignedTo?.length > 0 && task.assignedTo[0]?.email
-                ? task.assignedTo[0].email
-                : task.assignedTo?.length > 0 && task.assignedTo[0]?.name
+              <Users size={14} />
+              <span className="max-w-[150px] truncate">
+                {task.assignedTo?.length > 0 && task.assignedTo[0]?.email
+                  ? task.assignedTo[0].email
+                  : task.assignedTo?.length > 0 && task.assignedTo[0]?.name
                   ? task.assignedTo[0].name
                   : "Assign"}
+              </span>
             </button>
             {assignDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-100 dark:border-gray-700 max-h-40 overflow-y-auto">
+              <div className="absolute left-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-100 dark:border-gray-700 max-h-48 overflow-y-auto">
                 <div className="py-1">
                   {availableUsers.length > 0 ? (
                     availableUsers.map((user) => (
                       <button
                         key={user._id}
                         onClick={() => handleAssign(user.email)}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 justify-between"
                         disabled={isUpdating}
                       >
-                        {user.email} {user.role && `(${user.role})`}
+                        <span className="truncate">
+                          {user.name || user.email}
+                        </span>
+                        {user.role && (
+                          <span className="text-xs text-gray-500 ml-2">
+                            {user.role}
+                          </span>
+                        )}
                       </button>
                     ))
                   ) : (
-                    <div className="px-4 py-2 text-sm text-gray-500">No users available</div>
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      No members available for assignment
+                    </div>
                   )}
                 </div>
               </div>
@@ -455,5 +496,5 @@ export default function ManagerTaskCard({ task, mutate, onMoveTask, isAdmin = fa
         </div>
       )}
     </div>
-  )
+  );
 }
